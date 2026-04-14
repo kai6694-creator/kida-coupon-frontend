@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KIDA 可菱水 服務中心</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<style>
+  /* ── 基礎 ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue:      #1a6fad;
+    --blue-light:#e8f4fc;
+    --blue-mid:  #3b8fcf;
+    --teal:      #0e9280;
+    --teal-light:#e2f5f2;
+    --gold:      #c8973a;
+    --gold-light:#fdf5e6;
+    --red:       #d94040;
+    --gray-1:    #f7f8fa;
+    --gray-2:    #eef0f3;
+    --gray-3:    #c8ccd4;
+    --gray-4:    #8b909c;
+    --gray-5:    #3d4150;
+    --text:      #1e2230;
+    --white:     #ffffff;
+    --radius:    14px;
+    --radius-sm: 8px;
+    --shadow:    0 2px 16px rgba(26,111,173,.10);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,.07);
+  }
+
+  html, body {
+    font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+    background: var(--gray-1);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--white);
+    padding: 14px 20px 0;
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: var(--blue);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-mark svg { width: 22px; height: 22px; fill: white; }
+  .brand-name { font-size: 15px; font-weight: 700; color: var(--blue); letter-spacing: .03em; }
+  .brand-sub  { font-size: 11px; color: var(--gray-4); }
+
+  /* ── Tab Bar ── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: none;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px 4px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-4);
+    background: transparent;
+    border: none;
+    border-bottom: 2.5px solid transparent;
+    cursor: pointer;
+    transition: all .2s;
+    letter-spacing: .02em;
+  }
+  .tab-btn.active {
+    color: var(--blue);
+    border-bottom-color: var(--blue);
+  }
+
+  /* ── 主內容區 ── */
+  .main { padding: 20px 16px 40px; max-width: 480px; margin: 0 auto; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── 卡片 ── */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-5);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::before {
+    content: '';
+    width: 4px; height: 16px;
+    background: var(--blue);
+    border-radius: 2px;
+    display: block;
+  }
+
+  /* ── 表單 ── */
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-5);
+    margin-bottom: 6px;
+    letter-spacing: .03em;
+  }
+  .form-label span { color: var(--red); }
+  .form-control {
+    width: 100%;
+    height: 46px;
+    padding: 0 14px;
+    border: 1.5px solid var(--gray-2);
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    color: var(--text);
+    background: var(--gray-1);
+    transition: border-color .2s, background .2s;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .form-control:focus {
+    border-color: var(--blue-mid);
+    background: var(--white);
+  }
+  select.form-control {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238b909c' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  /* ── 按鈕 ── */
+  .btn {
+    width: 100%;
+    height: 50px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity .2s, transform .1s;
+    letter-spacing: .04em;
+  }
+  .btn:active { transform: scale(.98); opacity: .9; }
+  .btn-primary { background: var(--blue); color: white; }
+  .btn-teal    { background: var(--teal); color: white; }
+  .btn-outline {
+    background: white;
+    color: var(--blue);
+    border: 1.5px solid var(--blue);
+  }
+  .btn:disabled { opacity: .5; pointer-events: none; }
+
+  /* ── 優惠券卡片 ── */
+  .coupon-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .coupon-header {
+    background: linear-gradient(135deg, var(--blue) 0%, #0d4f8a 100%);
+    padding: 18px 20px 14px;
+    color: white;
+  }
+  .coupon-model { font-size: 12px; opacity: .8; margin-bottom: 3px; }
+  .coupon-title { font-size: 17px; font-weight: 700; letter-spacing: .02em; }
+  .coupon-discount {
+    margin-top: 10px;
+    display: inline-block;
+    background: rgba(255,255,255,.2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .coupon-body {
+    padding: 16px 20px;
+    border-top: 2px dashed var(--gray-2);
+    position: relative;
+  }
+  .coupon-body::before, .coupon-body::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    width: 18px; height: 18px;
+    background: var(--gray-1);
+    border-radius: 50%;
+    border: 1px solid var(--gray-2);
+  }
+  .coupon-body::before { left: -10px; }
+  .coupon-body::after  { right: -10px; }
+
+  .coupon-token {
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    color: var(--blue);
+    text-align: center;
+    margin: 6px 0 10px;
+  }
+  .coupon-info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--gray-4);
+    margin-top: 4px;
+  }
+  .coupon-info-row strong { color: var(--gray-5); }
+
+  /* ── 狀態標籤 ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-available { background: var(--teal-light); color: var(--teal); }
+  .badge-used      { background: var(--gray-2);     color: var(--gray-4); }
+  .badge-expired   { background: #fdecea;            color: var(--red); }
+  .badge-pending   { background: var(--gold-light);  color: var(--gold); }
+
+  /* ── 空狀態 ── */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--gray-4);
+  }
+  .empty-icon {
+    width: 60px; height: 60px;
+    background: var(--gray-2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+  }
+  .empty-icon svg { width: 28px; height: 28px; stroke: var(--gray-3); fill: none; stroke-width: 1.5; }
+  .empty-title { font-size: 14px; font-weight: 600; color: var(--gray-5); margin-bottom: 6px; }
+  .empty-desc  { font-size: 13px; line-height: 1.6; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--gray-5);
+    color: white;
+    padding: 12px 22px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 999;
+    transition: transform .3s ease;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: var(--teal); }
+  .toast.error   { background: var(--red); }
+
+  /* ── Loading ── */
+  .loading {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 40px; color: var(--gray-4); font-size: 14px;
+  }
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--gray-2);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── 資訊列表 ── */
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--gray-2);
+    font-size: 14px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-key   { color: var(--gray-4); font-size: 13px; }
+  .info-value { font-weight: 600; color: var(--gray-5); }
+
+  /* ── 步驟說明 ── */
+  .steps { margin-top: 4px; }
+  .step {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray-2);
+  }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    width: 24px; height: 24px;
+    background: var(--blue);
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-text { font-size: 13px; line-height: 1.6; color: var(--gray-5); }
+  .step-text strong { color: var(--blue); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-top">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C8.5 2 5 5.5 5 10c0 5.25 7 13 7 13s7-7.75 7-13c0-4.5-3.5-8-7-8zm0 11a3 3 0 110-6 3 3 0 010 6z"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name">KIDA 可菱水</div>
+      <div class="brand-sub">吉達興居家生活 服務中心</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('register', this)">產品登錄</button>
+    <button class="tab-btn"        onclick="switchTab('coupon', this)">我的優惠券</button>
+    <button class="tab-btn"        onclick="switchTab('guide', this)">使用說明</button>
+  </div>
+</div>
+
+<!-- 主內容 -->
+<div class="main">
+
+  <!-- ===== Tab 1：產品登錄 ===== -->
+  <div id="panel-register" class="panel active">
+
+    <div class="card">
+      <div class="card-title">填寫登錄資料</div>
+
+      <div class="form-group">
+        <label class="form-label">姓名 <span>*</span></label>
+        <input type="text" id="user-name" class="form-control" placeholder="請輸入您的姓名">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">產品型號 <span>*</span></label>
+        <select id="product-model" class="form-control">
+          <option value="">請選擇購買型號</option>
+          <optgroup label="龍頭型淨水器（濾心 3 個月）">
+            <option value="EF103">EF103 — Super High Grade</option>
+            <option value="EF201">EF201 — Super High Grade</option>
+            <option value="EF202">EF202 — Super High Grade</option>
+            <option value="EF203">EF203 — Super High Grade</option>
+            <option value="EF301">EF301 — High Standard</option>
+            <option value="EF401">EF401 — Basic</option>
+          </optgroup>
+          <optgroup label="置放型淨水器（濾心 12 個月）">
+            <option value="ET101">ET101 — Super High Grade</option>
+            <option value="ET201">ET201 — Super High Grade</option>
+          </optgroup>
+          <optgroup label="廚下型淨水器（濾心 12 個月）">
+            <option value="EU102">EU102 — Super High Grade</option>
+            <option value="EU103">EU103 — Super High Grade</option>
+            <option value="EU202">EU202 — Super High Grade</option>
+            <option value="EU301">EU301 — Super High Grade</option>
+          </optgroup>
+          <optgroup label="除氯蓮蓬頭">
+            <option value="ES301">ES301（濾芯 1 個月）</option>
+            <option value="ES201W">ES201W（濾芯 2 個月）</option>
+            <option value="ES101">ES101（濾芯 4 個月）</option>
+          </optgroup>
+          <optgroup label="淨水壺（濾心 3 個月）">
+            <option value="EJ103">EJ103</option>
+            <option value="CP013">CP013</option>
+            <option value="JP407D">JP407D</option>
+            <option value="JP407R">JP407R</option>
+            <option value="JP407T">JP407T</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">購買日期 <span>*</span></label>
+        <input type="date" id="purchase-date" class="form-control">
+      </div>
+
+      <button class="btn btn-primary" id="btn-register" onclick="submitRegistration()">
+        立即登錄產品
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">登錄後享有</div>
+      <div class="info-row">
+        <span class="info-key">保固提醒</span>
+        <span class="info-value">自動通知到期</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">濾心換購優惠券</span>
+        <span class="info-value">到期前自動發送</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">ES301 用戶</span>
+        <span class="info-value">登錄即贈換芯券</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Tab 2：我的優惠券 ===== -->
+  <div id="panel-coupon" class="panel">
+    <div id="coupon-loading" class="loading">
+      <div class="spinner"></div> 載入中…
+    </div>
+    <div id="coupon-list" style="display:none"></div>
+  </div>
+
+  <!-- ===== Tab 3：使用說明 ===== -->
+  <div id="panel-guide" class="panel">
+    <div class="card">
+      <div class="card-title">優惠券使用流程</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">系統於濾心到期前 <strong>30 天</strong>自動發送優惠券至您的 LINE</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text">點選「我的優惠券」查看您的<strong>專屬優惠碼</strong></div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text">前往 <strong>KIDA 指定門市</strong>或線上商城，出示優惠碼即可享折扣</div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text">優惠券有效期限以券面為準，到期前 <strong>3 天</strong>系統將再次提醒</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">各型號濾心更換週期</div>
+      <div class="info-row"><span class="info-key">龍頭型（EF 系列）</span><span class="info-value">3 個月</span></div>
+      <div class="info-row"><span class="info-key">置放型（ET 系列）</span><span class="info-value">12 個月</span></div>
+      <div class="info-row"><span class="info-key">廚下型（EU 系列）</span><span class="info-value">12 個月</span></div>
+      <div class="info-row"><span class="info-key">蓮蓬頭 ES301</span><span class="info-value">1 個月</span></div>
+      <div class="info-row"><span class="info-key">蓮蓬頭 ES201W</span><span class="info-value">2 個月</span></div>
+      <div class="info-row"><span class="info-key">蓮蓬頭 ES101</span><span class="info-value">4 個月</span></div>
+      <div class="info-row"><span class="info-key">淨水壺（EJ / CP / JP 系列）</span><span class="info-value">3 個月</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">客服聯絡</div>
+      <div class="info-row"><span class="info-key">電話</span><span class="info-value">02-2756-5899</span></div>
+      <div class="info-row"><span class="info-key">LINE 官方帳號</span><span class="info-value">@kida888</span></div>
+      <div class="info-row"><span class="info-key">服務時間</span><span class="info-value">週一至五 09:00-17:30</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── 設定 ──
+const API_BASE  = 'https://kida-coupon-system.onrender.com'; // 替換為實際 Render 網址
+const LIFF_ID   = '2009728428-I07Nl5fZ';                         // 替換為實際 LIFF ID
+
+let lineUserId  = null;
+let initialized = false;
+
+// ── LIFF 初始化 ──
+async function initLiff() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    const profile = await liff.getProfile();
+    lineUserId = profile.userId;
+    initialized = true;
+
+    // 依 URL 參數決定預設 tab
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'coupon') switchTab('coupon', document.querySelectorAll('.tab-btn')[1]);
+    if (tab === 'guide')  switchTab('guide',  document.querySelectorAll('.tab-btn')[2]);
+
+    // 預設今天為購買日期
+    document.getElementById('purchase-date').valueAsDate = new Date();
+
+  } catch (e) {
+    console.error('LIFF 初始化失敗', e);
+    showToast('初始化失敗，請重新開啟', 'error');
+  }
+}
+
+// ── Tab 切換 ──
+function switchTab(name, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  el.classList.add('active');
+
+  if (name === 'coupon' && initialized) loadCoupons();
+}
+
+// ── 產品登錄 ──
+async function submitRegistration() {
+  if (!initialized) { showToast('請稍候，初始化中…', 'error'); return; }
+
+  const name  = document.getElementById('user-name').value.trim();
+  const model = document.getElementById('product-model').value;
+  const date  = document.getElementById('purchase-date').value;
+
+  if (!name)  { showToast('請填寫姓名', 'error'); return; }
+  if (!model) { showToast('請選擇產品型號', 'error'); return; }
+  if (!date)  { showToast('請選擇購買日期', 'error'); return; }
+
+  const btn = document.getElementById('btn-register');
+  btn.disabled = true;
+  btn.textContent = '登錄中…';
+
+  try {
+    const res = await fetch(`${API_BASE}/api/registration`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        line_user_id:  lineUserId,
+        user_name:     name,
+        product_model: model,
+        purchase_date: date,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showToast('登錄成功！', 'success');
+      if (model === 'ES301') { setTimeout(() => switchTab('coupon', document.querySelectorAll('.tab-btn')[1]), 1200); }
+    } else { showToast(data.message || '登錄失敗', 'error'); }
+  } catch(e) { showToast('紲路錯誤，請臍後再試', 'error'); }
+  finally { btn.disabled = false; btn.textContent = '竍即登錄產品'; }
+}
+
+async function loadCoupons() {
+  if (!initialized) return;
+  document.getElementById('coupon-loading').style.display = 'flex';
+  document.getElementById('coupon-list').style.display = 'none';
+  try {
+    const res = await fetch(`${API_BASE}/api/coupon/status?line_user_id=${lineUserId}`);
+    const data = await res.json();
+    document.getElementById('coupon-loading').style.display = 'none';
+    document.getElementById('coupon-list').style.display = 'block';
+    if (!data.success || data.data.length === 0) { document.getElementById('coupon-list').innerHTML = '<div class="card" style="text-align:center">尚猡優惠券</div>'; return; }
+    document.getElementById('coupon-list').innerHTML = data.data.map(renderCoupon).join('');
+  } catch(e) {
+    document.getElementById('coupon-loading').style.display = 'none';
+    document.getElementById('coupon-list').style.display = 'block';
+    document.getElementById('coupon-list').innerHTML = '<div class="card" style="text-align:center;color:#d94040">耞入失敗，請懍驦</div>';
+  }
+}
+
+function renderCoupon(c) {
+  const statusMap = { available: '<span class="badge badge-available">✓ 可使用</span>', used: '<span class="badge badge-used">已怸銷</span>', expired: '<span class="badge badge-expired">已過期</span>', not_issued: '<span class="badge badge-pending">待發券</span>' };
+  if (c.coupon_status === 'not_issued') return `<div class="coupon-card" style="opacity:.7"><div class="coupon-header"><div class="coupon-model">${c.product_model}</div><div class="coupon-title">優惠券尚無</div></div><div class="coupon-body"><div style="text-align:center;color:#8b909c">泻統將於濾心到期前 30 天号鎛游</div><div class="coupon-info-row"><span>購買日</span><strong>${c.purchase_date}</strong></div></div></div>`;
+  return `<div class="coupon-card"><div class="coupon-header"><div class="coupon-model">${c.product_model}</div><div class="coupon-title">可菱水原廠濾心 9 折優惠</div><div class="coupon-discount">9折 + 免運費</div></div><div class="coupon-body"><div style="text-align:center;margin-bottom:8px">${statusMap[c.coupon_status] || ''}</div><div class="coupon-token">${c.coupon_token || '-'}</div><div class="coupon-info-row"><span>適用型號</span><strong>${c.product_model}</strong></div><div class="coupon-info-row"><span>月效期限</span><strong>${c.expire_date || '-'}</strong></div>${c.coupon_used_at ? `<div class="coupon-info-row"><span>核銷闢</span><strong>${c.coupon_used_at}</strong></div>` : ''}</div></div>`;
+}
+let toastTimer;
+function showToast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast ' + type; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+initLiff();
+</script>
+</body>
+</html>
