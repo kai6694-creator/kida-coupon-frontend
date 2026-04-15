@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KIDA 門市核銷系統</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--blue:#1a6fad;--teal:#0e9280;--teal-light:#e2f5f2;--red:#d94040;--red-light:#fdecea;--gray-1:#f7f8fa;--gray-2:#eef0f3;--gray-4:#8b909c;--gray-5:#3d4150;--white:#fff;--radius:14px;--radius-sm:8px}
+body{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;background:var(--gray-1);color:var(--gray-5);min-height:100vh}
+.header{background:var(--blue);padding:18px 20px;color:white;display:flex;align-items:center;gap:10px}
+.header-icon{width:38px;height:38px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.header h1{font-size:16px;font-weight:700}
+.header p{font-size:12px;opacity:.75;margin-top:2px}
+.main{padding:20px 16px 40px;max-width:480px;margin:0 auto}
+.card{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:0 1px 6px rgba(0,0,0,.07);margin-bottom:14px}
+.card-title{font-size:14px;font-weight:700;color:var(--gray-5);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';width:4px;height:16px;background:var(--blue);border-radius:2px;display:block}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--gray-5);margin-bottom:6px}
+.token-input{width:100%;height:54px;padding:0 16px;border:2px solid var(--gray-2);border-radius:var(--radius-sm);font-size:20px;font-family:'Courier New',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);background:var(--gray-1);outline:none;text-align:center;transition:border-color .2s}
+.token-input:focus{border-color:var(--blue);background:white}
+.btn{width:100%;height:50px;border:none;border-radius:var(--radius-sm);font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:12px}
+.btn:active{transform:scale(.98);opacity:.9}
+.btn-primary{background:var(--blue);color:white}
+.btn-teal{background:var(--teal);color:white}
+.btn-gray{background:var(--gray-2);color:var(--gray-5)}
+.btn:disabled{opacity:.4;pointer-events:none}
+.result-card{border-radius:var(--radius);padding:20px;margin-bottom:14px;display:none}
+.result-card.valid{background:var(--teal-light);border:1.5px solid var(--teal)}
+.result-card.invalid{background:var(--red-light);border:1.5px solid var(--red)}
+.result-card.success{background:#e8faf0;border:1.5px solid #2daa5f}
+.result-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.result-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.result-icon.valid{background:var(--teal);color:white}
+.result-icon.invalid{background:var(--red);color:white}
+.result-icon.success{background:#2daa5f;color:white}
+.result-title{font-size:16px;font-weight:700}
+.result-title.valid{color:var(--teal)}
+.result-title.invalid{color:var(--red)}
+.result-title.success{color:#1e7a43}
+.result-sub{font-size:12px;color:var(--gray-4);margin-top:2px}
+.info-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(0,0,0,.07);font-size:14px}
+.info-row:last-child{border-bottom:none}
+.info-key{color:var(--gray-4)}
+.info-value{font-weight:600}
+.warning-box{background:#fff8e1;border:1.5px solid #f5c842;border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:#7a6000;margin-top:12px;line-height:1.6}
+.history-item{padding:10px 0;border-bottom:1px solid var(--gray-2);font-size:13px}
+.history-item:last-child{border-bottom:none}
+.history-token{font-family:monospace;font-weight:700;color:var(--blue)}
+.history-meta{color:var(--gray-4);font-size:12px;margin-top:2px}
+.badge-ok{background:var(--teal-light);color:var(--teal);padding:2px 8px;border-radius:10px;font-size:11px}
+.badge-ng{background:var(--red-light);color:var(--red);padding:2px 8px;border-radius:10px;font-size:11px}
+.spinner{width:20px;height:20px;border:2px solid var(--gray-2);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--gray-5);color:white;padding:12px 22px;border-radius:30px;font-size:14px;font-weight:500;z-index:999;transition:transform .3s ease;white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{background:var(--teal)}
+.toast.error{background:var(--red)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">🏪</div>
+  <div>
+    <h1>KIDA 門市核銷系統</h1>
+    <p>濾心換購優惠券門市核銷使用</p>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="card">
+    <div class="card-title">輸入優惠券碼</div>
+    <label class="form-label">優惠券碼（範例：KIDA-EF201-A8X2）</label>
+    <input type="text" id="token-input" class="token-input"
+      placeholder="KIDA-XXXX-XXXXXX" maxlength="30"
+      oninput="this.value=this.value.toUpperCase();resetResult()">
+    <button class="btn btn-primary" id="btn-verify" onclick="verifyCoupon()">
+      查驗優惠券
+    </button>
+  </div>
+
+  <div class="result-card valid" id="result-valid">
+    <div class="result-header">
+      <div class="result-icon valid">✓</div>
+      <div>
+        <div class="result-title valid">優惠券有效</div>
+        <div class="result-sub">確認無誤後請點擊核銷按鈕</div>
+      </div>
+    </div>
+    <div id="valid-info"></div>
+    <div class="warning-box">⚠ 核銷後將立即使用，請確認顧客已選購濾心並同意折扣後再進行核銷。</div>
+    <button class="btn btn-teal" id="btn-redeem" onclick="redeemCoupon()">確認核銷</button>
+    <button class="btn btn-gray" onclick="resetAll()" style="margin-top:8px">重置</button>
+  </div>
+
+  <div class="result-card invalid" id="result-invalid">
+    <div class="result-header">
+      <div class="result-icon invalid">✗</div>
+      <div>
+        <div class="result-title invalid" id="invalid-title">優惠券無效</div>
+        <div class="result-sub" id="invalid-sub"></div>
+      </div>
+    </div>
+    <button class="btn btn-gray" onclick="resetAll()">重新查驗</button>
+  </div>
+
+  <div class="result-card success" id="result-success">
+    <div class="result-header">
+      <div class="result-icon success">✓</div>
+      <div>
+        <div class="result-title success">核銷成功！</div>
+        <div class="result-sub" id="success-time"></div>
+      </div>
+    </div>
+    <div id="success-info"></div>
+    <button class="btn btn-primary" onclick="resetAll()" style="margin-top:16px">繼續核銷</button>
+  </div>
+
+  <div class="card" id="history-card" style="display:none">
+    <div class="card-title">本次核銷記錄</div>
+    <div id="history-list"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_BASE = 'https://kida-coupon-system.onrender.com';
+const STAFF_ID = 'STORE-01';
+let currentToken = '';
+let redeemHistory = [];
+let toastTimer;
+
+function showToast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + (type || '');
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+function showCard(id) {
+  ['result-valid','result-invalid','result-success'].forEach(i => {
+    document.getElementById(i).style.display = 'none';
+  });
+  document.getElementById(id).style.display = 'block';
+}
+
+function hideAll() {
+  ['result-valid','result-invalid','result-success'].forEach(i => {
+    document.getElementById(i).style.display = 'none';
+  });
+}
+
+function resetResult() { hideAll(); }
+
+function resetAll() {
+  hideAll();
+  document.getElementById('token-input').value = '';
+  currentToken = '';
+}
+
+async function verifyCoupon() {
+  const token = document.getElementById('token-input').value.trim();
+  if (!token) { showToast('請輸入優惠券碼', 'error'); return; }
+  currentToken = token;
+  const btn = document.getElementById('btn-verify');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 查驗中...';
+  hideAll();
+  try {
+    const res = await fetch(`${API_BASE}/api/coupon/verify`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({coupon_token: token})
+    });
+    const d = await res.json();
+    if (d.valid) {
+      document.getElementById('valid-info').innerHTML = `
+        <div class="info-row"><span class="info-key">優惠券碼</span><span class="info-value" style="font-family:monospace;color:#1a6fad">${token}</span></div>
+        <div class="info-row"><span class="info-key">適用型號</span><span class="info-value">${d.product_model}</span></div>
+        <div class="info-row"><span class="info-key">有效期限</span><span class="info-value">${d.expire_date}</span></div>
+        <div class="info-row"><span class="info-key">剩餘天數</span><span class="info-value" style="color:#0e9280">${d.days_left} 天</span></div>
+        <div class="info-row"><span class="info-key">折扣內容</span><span class="info-value">濾心 9 折 + 免運費</span></div>
+      `;
+      showCard('result-valid');
+    } else {
+      document.getElementById('invalid-title').textContent = '優惠券無效';
+      document.getElementById('invalid-sub').textContent = d.reason || '優惠券碼不存在或已使用/過期';
+      showCard('result-invalid');
+    }
+  } catch(e) {
+    showToast('網路錯誤，請重試', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '查驗優惠券';
+  }
+}
+
+async function redeemCoupon() {
+  const btn = document.getElementById('btn-redeem');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 核銷中...';
+  try {
+    const res = await fetch(`${API_BASE}/api/coupon/redeem`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({coupon_token: currentToken, staff_id: STAFF_ID})
+    });
+    const d = await res.json();
+    hideAll();
+    if (d.success) {
+      document.getElementById('success-time').textContent = '核銷時間：' + d.redeemed_at;
+      document.getElementById('success-info').innerHTML = `
+        <div class="info-row"><span class="info-key">優惠券碼</span><span class="info-value" style="font-family:monospace;color:#1a6fad">${currentToken}</span></div>
+        <div class="info-row"><span class="info-key">適璨型號</span><span class="info-value">${d.product_model}</span></div>
+        <div class="info-row"><span class="info-key">核銷門市</span><span class="info-value">${STAFF_ID}</span></div>
+      `;
+      showCard('result-success');
+      redeemHistory.unshift({token: currentToken, model: d.product_model, time: d.redeemed_at, ok: true});
+      renderHistory();
+      showToast('核銷成功！', 'success');
+    } else {
+      document.getElementById('invalid-title').textContent = '核銷失敗';
+      document.getElementById('invalid-sub').textContent = d.message;
+      showCard('result-invalid');
+    }
+  } catch(e) {
+    showToast('核銷失敗，請重試', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '確認核銷';
+  }
+}
+
+function renderHistory() {
+  if (redeemHistory.length === 0) return;
+  document.getElementById('history-card').style.display = 'block';
+  document.getElementById('history-list').innerHTML = redeemHistory.map(h => `
+    <div class="history-item">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="history-token">${h.token}</span>
+        <span class="${h.ok ? 'badge-ok' : 'badge-ng'}">${h.ok ? '核銷成功' : '失敗'}</span>
+      </div>
+      <div class="history-meta">${h.model} ｜ ${h.time}</div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('token-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') verifyCoupon();
+});
+</script>
+</body>
+</html>
