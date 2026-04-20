@@ -572,8 +572,8 @@ async function submitRegistration() {
       showToast('登錄成功！', 'success');
       if (model === 'ES301') { setTimeout(() => switchTab('coupon', document.querySelectorAll('.tab-btn')[1]), 1200); }
     } else { showToast(data.message || '登錄失敗', 'error'); }
-  } catch(e) { showToast('紲路錯誤，請臍後再試', 'error'); }
-  finally { btn.disabled = false; btn.textContent = '竍即登錄產品'; }
+  } catch(e) { showToast('網路錯誤，請稍後再試', 'error'); }
+  finally { btn.disabled = false; btn.textContent = '立即登錄產品'; }
 }
 
 async function loadCoupons() {
@@ -585,19 +585,19 @@ async function loadCoupons() {
     const data = await res.json();
     document.getElementById('coupon-loading').style.display = 'none';
     document.getElementById('coupon-list').style.display = 'block';
-    if (!data.success || data.data.length === 0) { document.getElementById('coupon-list').innerHTML = '<div class="card" style="text-align:center">尚猡優惠券</div>'; return; }
+    if (!data.success || data.data.length === 0) { document.getElementById('coupon-list').innerHTML = '<div class="card" style="text-align:center">尚無優惠券</div>'; return; }
     document.getElementById('coupon-list').innerHTML = data.data.map(renderCoupon).join('');
   } catch(e) {
     document.getElementById('coupon-loading').style.display = 'none';
     document.getElementById('coupon-list').style.display = 'block';
-    document.getElementById('coupon-list').innerHTML = '<div class="card" style="text-align:center;color:#d94040">耞入失敗，請懍驦</div>';
+    document.getElementById('coupon-list').innerHTML = '<div class="card" style="text-align:center;color:#d94040">載入失敗，請稍後</div>';
   }
 }
 
 function renderCoupon(c) {
-  const statusMap = { available: '<span class="badge badge-available">✓ 可使用</span>', used: '<span class="badge badge-used">已怸銷</span>', expired: '<span class="badge badge-expired">已過期</span>', not_issued: '<span class="badge badge-pending">待發券</span>' };
-  if (c.coupon_status === 'not_issued') return `<div class="coupon-card" style="opacity:.7"><div class="coupon-header"><div class="coupon-model">${c.product_model}</div><div class="coupon-title">優惠券尚無</div></div><div class="coupon-body"><div style="text-align:center;color:#8b909c">泻統將於濾心到期前 30 天号鎛游</div><div class="coupon-info-row"><span>購買日</span><strong>${c.purchase_date}</strong></div></div></div>`;
-  return `<div class="coupon-card"><div class="coupon-header"><div class="coupon-model">${c.product_model}</div><div class="coupon-title">可菱水原廠濾心 9 折優惠</div><div class="coupon-discount">9折 + 免運費</div></div><div class="coupon-body"><div style="text-align:center;margin-bottom:8px">${statusMap[c.coupon_status] || ''}</div><div class="coupon-token">${c.coupon_token || '-'}</div><div class="coupon-info-row"><span>適用型號</span><strong>${c.product_model}</strong></div><div class="coupon-info-row"><span>月效期限</span><strong>${c.expire_date || '-'}</strong></div>${c.coupon_used_at ? `<div class="coupon-info-row"><span>核銷闢</span><strong>${c.coupon_used_at}</strong></div>` : ''}</div></div>`;
+  const statusMap = { available: '<span class="badge badge-available">✓ 可使用</span>', used: '<span class="badge badge-used">已核銷</span>', expired: '<span class="badge badge-expired">已過期</span>', not_issued: '<span class="badge badge-pending">待發券</span>' };
+  if (c.coupon_status === 'not_issued') return `<div class="coupon-card" style="opacity:.7"><div class="coupon-header"><div class="coupon-model">${c.product_model}</div><div class="coupon-title">尚未發券</div></div><div class="coupon-body"><div style="text-align:center;color:#8b909c">系統將於濾心到期前 30 天自動發送</div><div class="coupon-info-row"><span>購買日</span><strong>${c.purchase_date}</strong></div></div></div>`;
+  return `<div class="coupon-card"><div class="coupon-header"><div class="coupon-model">${c.product_model}</div><div class="coupon-title">可菱水原廠濾心 9 折優惠</div><div class="coupon-discount">9折 + 免運費</div></div><div class="coupon-body"><div style="text-align:center;margin-bottom:8px">${statusMap[c.coupon_status] || ''}</div><div class="coupon-token">${c.coupon_token || '-'}</div><div class="coupon-info-row"><span>適用型號</span><strong>${c.product_model}</strong></div><div class="coupon-info-row"><span>有效期限</span><strong>${c.expire_date || '-'}</strong></div>${c.coupon_used_at ? `<div class="coupon-info-row"><span>核銷日</span><strong>${c.coupon_used_at}</strong></div>` : ''}</div></div>`;
 }
 let toastTimer;
 function showToast(msg, type = '') {
