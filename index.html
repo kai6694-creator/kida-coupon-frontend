@@ -499,7 +499,7 @@
 
 <script>
 // ── 設定 ──
-const API_BASE  = 'https://kida-coupon-system.onrender.com'; // 替換為實際 Render 網址
+const API_BASE  = 'https://line-reminder-backend.onrender.com';
 const LIFF_ID   = '2009728428-I07Nl5fZ';                         // 替換為實際 LIFF ID
 
 let lineUserId  = null;
@@ -556,7 +556,7 @@ async function submitRegistration() {
   btn.textContent = '登錄中…';
 
   try {
-    const res = await fetch(`${API_BASE}/api/registration`, {
+    const res = await fetch(`${API_BASE}/api/register-product`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
