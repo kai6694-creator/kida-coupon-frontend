@@ -572,7 +572,7 @@ async function submitRegistration() {
       showToast('登錄成功！優惠券已發放 🎉', 'success');
       try {
         if (liff.isInClient()) {
-          await liff.sendMessages([{ type: 'text', text: '__KIDA_COUPON__' }]);
+          await liff.sendMessages([{ type: 'text', text: 'KIDA_保固登錄完成' }]);
         }
       } catch (e) { console.log('trigger:', e.message); }
       if (model === 'ES301') { setTimeout(() => switchTab('coupon', document.querySelectorAll('.tab-btn')[1]), 1200); }
