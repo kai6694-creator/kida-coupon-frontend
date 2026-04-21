@@ -569,7 +569,12 @@ async function submitRegistration() {
     const data = await res.json();
 
     if (data.success) {
-      showToast('登錄成功！', 'success');
+      showToast('登錄成功！優惠券已發放 🎉', 'success');
+      try {
+        if (liff.isInClient()) {
+          await liff.sendMessages([{ type: 'text', text: '__KIDA_COUPON__' }]);
+        }
+      } catch (e) { console.log('trigger:', e.message); }
       if (model === 'ES301') { setTimeout(() => switchTab('coupon', document.querySelectorAll('.tab-btn')[1]), 1200); }
     } else { showToast(data.message || '登錄失敗', 'error'); }
   } catch(e) { showToast('網路錯誤，請稍後再試', 'error'); }
