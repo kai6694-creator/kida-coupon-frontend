@@ -419,6 +419,30 @@
         <input type="date" id="purchase-date" class="form-control">
       </div>
 
+      <div class="form-group">
+        <label class="form-label">購買處 <span>*</span></label>
+        <select id="purchase-place" class="form-control">
+          <option value="">請選擇購買門市</option>
+          <optgroup label="SOGO 太平洋百貨">
+            <option value="忠孝SOGO">忠孝SOGO</option>
+            <option value="中壢SOGO">中壢SOGO</option>
+            <option value="大巨蛋SOGO">大巨蛋SOGO</option>
+            <option value="新竹巨城SOGO">新竹巨城SOGO</option>
+          </optgroup>
+          <optgroup label="遠東百貨">
+            <option value="遠東板橋">遠東板橋</option>
+          </optgroup>
+          <optgroup label="新光三越百貨">
+            <option value="新光三越站前">新光三越站前</option>
+            <option value="新光三越信義A8">新光三越信義A8</option>
+            <option value="新光三越南西">新光三越南西</option>
+          </optgroup>
+          <optgroup label="其他">
+            <option value="官網購買">官網購買</option>
+          </optgroup>
+        </select>
+      </div>
+
       <button class="btn btn-primary" id="btn-register" onclick="submitRegistration()">
         立即登錄產品
       </button>
@@ -543,10 +567,12 @@ async function submitRegistration() {
   const name  = document.getElementById('user-name').value.trim();
   const model = document.getElementById('product-model').value;
   const date  = document.getElementById('purchase-date').value;
+  const place = document.getElementById('purchase-place').value;
 
   if (!name)  { showToast('請填寫姓名', 'error'); return; }
   if (!model) { showToast('請選擇產品型號', 'error'); return; }
   if (!date)  { showToast('請選擇購買日期', 'error'); return; }
+  if (!place) { showToast('請選擇購買處', 'error'); return; }
 
   const btn = document.getElementById('btn-register');
   btn.disabled = true;
@@ -557,10 +583,11 @@ async function submitRegistration() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        line_user_id:  lineUserId,
-        user_name:     name,
-        product_model: model,
-        purchase_date: date,
+        line_user_id:   lineUserId,
+        user_name:      name,
+        product_model:  model,
+        purchase_date:  date,
+        purchase_place: place,
       }),
     });
     const data = await res.json();
